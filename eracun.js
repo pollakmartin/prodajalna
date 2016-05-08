@@ -164,6 +164,19 @@ var strankaIzRacuna = function(racunId, callback) {
     })
 }
 
+var pridobiUporabniskePodatke = function(uporabnikId, callback) {
+    pb.all("SELECT Customer.* FROM Customer WHERE Customer.CustomerId = "+uporabnikId,
+    function(napaka, vrstice) {
+      //console.log(vrstice);
+      if(!napaka){
+        callback(vrstice);
+      }
+      else{
+        callback(null);
+      }
+    })
+}
+
 // Izpis računa v HTML predstavitvi na podlagi podatkov iz baze
 streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
@@ -197,19 +210,23 @@ streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
   pesmiIzKosarice(zahteva, function(pesmi) {
-    if (!pesmi) {
-      odgovor.sendStatus(500);
-    } else if (pesmi.length == 0) {
-      odgovor.send("<p>V košarici nimate nobene pesmi, \
-        zato računa ni mogoče pripraviti!</p>");
-    } else {
-      odgovor.setHeader('content-type', 'text/xml');
-      odgovor.render('eslog', {
-        vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
-        postavkeRacuna: pesmi
-      })  
-    }
-  })
+    var idUporabnika = zahteva.session.uporabnik;
+    pridobiUporabniskePodatke(idUporabnika, function(uporabnik) {
+      if (!pesmi) {
+        odgovor.sendStatus(500);
+      } else if (pesmi.length == 0) {
+        odgovor.send("<p>V košarici nimate nobene pesmi, \
+          zato računa ni mogoče pripraviti!</p>");
+      } else {
+        odgovor.setHeader('content-type', 'text/xml');
+        odgovor.render('eslog', {
+          vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
+          postavkeRacuna: pesmi,
+          uporabnikoviPodatki: uporabnik
+        })  
+      }
+    });
+  });
 })
 
 // Privzeto izpiši račun v HTML obliki
@@ -281,8 +298,13 @@ streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
+<<<<<<< HEAD
     zahteva.session.uporabnik =  polja.seznamStrank;
     odgovor.redirect('/');
+=======
+    zahteva.session.uporabnik = polja.seznamStrank;
+    odgovor.redirect('/')
+>>>>>>> prikaz-racuna-trenutni
   });
 })
 
