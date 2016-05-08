@@ -298,13 +298,8 @@ streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
-<<<<<<< HEAD
-    zahteva.session.uporabnik =  polja.seznamStrank;
-    odgovor.redirect('/');
-=======
     zahteva.session.uporabnik = polja.seznamStrank;
     odgovor.redirect('/')
->>>>>>> prikaz-racuna-trenutni
   });
 })
 
